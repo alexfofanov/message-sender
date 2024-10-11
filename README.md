@@ -14,7 +14,7 @@
 
 ## Установка и запуск
 ```
-git clone https://github.com/alexfofanov/messages-sender.git
+git clone https://github.com/alexfofanov/message-sender.git
 
 cd messages-sender
 

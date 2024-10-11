@@ -10,6 +10,8 @@ python = "^3.12.7"
 fastapi = {extras = ["standard"], version = "^0.115.0"}
 pydantic-settings = "^2.5.2"
 orjson = "^3.10.7"
+fastapi-mail = "^1.4.1"
+redis = "^5.1.1"
 
 
 [build-system]

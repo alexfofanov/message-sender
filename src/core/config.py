@@ -33,6 +33,9 @@ class Settings(BaseSettings):
         if file_path.exists():
             with open(file_path) as f:
                 return [ConnectionConfig(**server) for server in json.load(f)]
+        logger.error(
+            f'Отсутствует файл конфигурации SMTP серверов {self.smtp_servers_file}'
+        )
         return []
 
     @property

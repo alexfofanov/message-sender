@@ -11,7 +11,6 @@ from src.core.config import EMAIL_QUEUE, settings
 from src.db.redis import redis
 from src.schemas.send_email import EmailMessageInfo, SendEmailStatus
 
-
 send_email_router = APIRouter()
 
 
@@ -46,7 +45,7 @@ async def send_email(
 
     for email in emails:
         await redis.rpush(
-            'email_queue',
+            EMAIL_QUEUE,
             json.dumps(
                 {
                     'email': email,
@@ -59,12 +58,13 @@ async def send_email(
 
     if attach_files_paths:
         for file_path in attach_files_paths:
-            await redis.set(
-                file_path, len(emails), ex=settings.redis_ttl_sec
-            )
+            await redis.set(file_path, len(emails), ex=settings.redis_ttl_sec)
 
     return {
-        'status': f'В очередь на отправку добавлены сообщения в количестве: {len(emails)}'
+        'status': (
+            f'В очередь на отправку добавлены сообщения в количестве: '
+            f'{len(emails)}'
+        )
     }
 
 

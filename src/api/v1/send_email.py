@@ -34,15 +34,16 @@ async def send_email(
     """
 
     attach_files_paths = []
-    for file in files:
-        upload_folder = Path(
-            f'{settings.upload_folder}/{str(uuid.uuid4())}'
-        )
-        upload_folder.mkdir(parents=True, exist_ok=True)
-        file_path = upload_folder / file.filename
-        with file_path.open("wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        attach_files_paths.append(str(file_path))
+    if files:
+        for file in files:
+            upload_folder = Path(
+                f'{settings.upload_folder}/{str(uuid.uuid4())}'
+            )
+            upload_folder.mkdir(parents=True, exist_ok=True)
+            file_path = upload_folder / file.filename
+            with file_path.open("wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+            attach_files_paths.append(str(file_path))
 
     for email in emails:
         await redis.rpush(
@@ -56,7 +57,6 @@ async def send_email(
                 }
             ),
         )
-
 
     for file_path in attach_files_paths:
         await redis.set(file_path, len(emails), ex=settings.redis_ttl_sec)

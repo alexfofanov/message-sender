@@ -4,7 +4,7 @@ from logging import config as logging_config
 from pathlib import Path
 
 from fastapi_mail import ConnectionConfig
-from pydantic import ConfigDict, EmailStr, IPvAnyAddress
+from pydantic import ConfigDict, IPvAnyAddress
 from pydantic_settings import BaseSettings
 
 from src.core.logger import LOGGING
@@ -34,7 +34,10 @@ class Settings(BaseSettings):
             with open(file_path) as f:
                 return [ConnectionConfig(**server) for server in json.load(f)]
         logger.error(
-            f'Отсутствует файл конфигурации SMTP серверов {self.smtp_servers_file}'
+            (
+                f'Отсутствует файл конфигурации SMTP серверов '
+                f'{self.smtp_servers_file}'
+            )
         )
         return []
 

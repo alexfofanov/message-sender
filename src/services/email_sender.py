@@ -2,15 +2,28 @@ import asyncio
 import smtplib
 from pathlib import Path
 
-from fastapi_mail import FastMail, MessageSchema
+from fastapi_mail import ConnectionConfig, FastMail, MessageSchema
+from redis.asyncio import Redis
 
 from src.core.config import logger, settings
-from src.db.redis import redis
+
+config = ConnectionConfig(
+    MAIL_USERNAME='',
+    MAIL_PASSWORD='',
+    MAIL_FROM='from@example.com',
+    MAIL_PORT=1025,
+    MAIL_SERVER='localhost',
+    MAIL_FROM_NAME='Your Name1',
+    MAIL_STARTTLS=False,
+    MAIL_SSL_TLS=False,
+)
+fm = FastMail(config)
 
 
-async def decr_or_delete(attachments: list[str]) -> None:
+async def decr_or_delete(attachments: list[str], redis: Redis) -> None:
     """
-    Удаление вложенных файлов после отправки всех сообщений к которым они прилагаются
+    Удаление вложенных файлов после отправки всех сообщений к которым они
+    прилагаются
     """
 
     for attachment in attachments:
@@ -28,10 +41,11 @@ async def decr_or_delete(attachments: list[str]) -> None:
                 parent_directory.rmdir()
 
 
-async def send_email(message_fields: dict) -> None:
+async def send_email(message_fields: dict, redis: Redis) -> None:
     """
     Отправка электронной почты
     """
+    tmp = fm.config
 
     for server in settings.smtp_servers:
         message = MessageSchema(
@@ -42,7 +56,7 @@ async def send_email(message_fields: dict) -> None:
             attachments=message_fields['attach_files_paths'],
         )
 
-        fm = FastMail(server)
+        fm.config.__dict__ = server.__dict__.copy()
         try:
             await fm.send_message(message)
             logger.info(
@@ -53,7 +67,7 @@ async def send_email(message_fields: dict) -> None:
             )
 
             if message_fields['attach_files_paths']:
-                await decr_or_delete(message_fields['attach_files_paths'])
+                await decr_or_delete(message_fields['attach_files_paths'], redis)
 
             await asyncio.sleep(settings.sending_interval_sec)
             return

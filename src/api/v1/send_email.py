@@ -4,11 +4,12 @@ import uuid
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import APIRouter, Form, UploadFile, status
+from fastapi import APIRouter, Form, UploadFile, status, Depends
 from pydantic import EmailStr
+from redis.asyncio import Redis
 
 from src.core.config import EMAIL_QUEUE, settings
-from src.db.redis import redis
+from src.db.redis import get_redis
 from src.schemas.send_email import EmailMessageInfo, SendEmailStatus
 
 send_email_router = APIRouter()
@@ -22,6 +23,7 @@ send_email_router = APIRouter()
 )
 async def send_email(
     *,
+    redis: Redis = Depends(get_redis),
     emails: list[EmailStr] = Form(...),
     subject: str = Form(...),
     body: str = Form(...),
@@ -32,16 +34,15 @@ async def send_email(
     """
 
     attach_files_paths = []
-    if files:
-        for file in files:
-            upload_folder = Path(
-                f'{settings.upload_folder}/{str(uuid.uuid4())}'
-            )
-            upload_folder.mkdir(parents=True, exist_ok=True)
-            file_path = upload_folder / file.filename
-            with file_path.open("wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
-            attach_files_paths.append(str(file_path))
+    for file in files:
+        upload_folder = Path(
+            f'{settings.upload_folder}/{str(uuid.uuid4())}'
+        )
+        upload_folder.mkdir(parents=True, exist_ok=True)
+        file_path = upload_folder / file.filename
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        attach_files_paths.append(str(file_path))
 
     for email in emails:
         await redis.rpush(
@@ -56,9 +57,9 @@ async def send_email(
             ),
         )
 
-    if attach_files_paths:
-        for file_path in attach_files_paths:
-            await redis.set(file_path, len(emails), ex=settings.redis_ttl_sec)
+
+    for file_path in attach_files_paths:
+        await redis.set(file_path, len(emails), ex=settings.redis_ttl_sec)
 
     return {
         'status': (
@@ -74,7 +75,7 @@ async def send_email(
     summary='Получение статуса',
     description='Получение статуса очереди отправки сообщений',
 )
-async def get_email_status() -> Any:
+async def get_email_status(redis: Redis = Depends(get_redis)) -> Any:
     """
     Получение статуса очереди отправки сообщений
     """

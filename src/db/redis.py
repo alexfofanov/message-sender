@@ -1,5 +1,5 @@
 import redis.asyncio
-from redis import Redis
+from redis.asyncio import Redis
 
 from src.core.config import settings
 
@@ -10,4 +10,4 @@ async def get_redis() -> Redis:
     try:
         yield redis
     finally:
-        await redis.close()
+        await redis.aclose()

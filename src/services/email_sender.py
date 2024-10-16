@@ -45,8 +45,6 @@ async def send_email(message_fields: dict, redis: Redis) -> None:
     """
     Отправка электронной почты
     """
-    tmp = fm.config
-
     for server in settings.smtp_servers:
         message = MessageSchema(
             subject=message_fields['subject'],
@@ -65,7 +63,6 @@ async def send_email(message_fields: dict, redis: Redis) -> None:
                     f'через SMTP сервер {server.MAIL_SERVER}'
                 )
             )
-
             if message_fields['attach_files_paths']:
                 await decr_or_delete(message_fields['attach_files_paths'], redis)
 
@@ -79,7 +76,6 @@ async def send_email(message_fields: dict, redis: Redis) -> None:
                     f'при отправке на {message.recipients[0]}'
                 )
             )
-
         except smtplib.SMTPRecipientsRefused:
             logger.error(
                 (
@@ -88,7 +84,6 @@ async def send_email(message_fields: dict, redis: Redis) -> None:
                 )
             )
             break
-
         except smtplib.SMTPAuthenticationError:
             logger.error(
                 (
@@ -96,7 +91,6 @@ async def send_email(message_fields: dict, redis: Redis) -> None:
                     f'Проверьте логин/пароль'
                 )
             )
-
         except smtplib.SMTPException as e:
             logger.error(
                 (
@@ -104,7 +98,6 @@ async def send_email(message_fields: dict, redis: Redis) -> None:
                     f'при отправке письма на {message.recipients[0]}: {str(e)}'
                 )
             )
-
         except Exception as e:
             logger.error(
                 (
@@ -120,4 +113,4 @@ async def send_email(message_fields: dict, redis: Redis) -> None:
         )
     )
     if message_fields['attach_files_paths']:
-        await decr_or_delete(message_fields['attach_files_paths'])
+        await decr_or_delete(message_fields['attach_files_paths'], redis)

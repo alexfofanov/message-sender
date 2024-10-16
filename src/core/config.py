@@ -4,7 +4,7 @@ from logging import config as logging_config
 from pathlib import Path
 
 from fastapi_mail import ConnectionConfig
-from pydantic import ConfigDict, IPvAnyAddress
+from pydantic import ConfigDict, DirectoryPath, FilePath, IPvAnyAddress
 from pydantic_settings import BaseSettings
 
 from src.core.logger import LOGGING
@@ -17,12 +17,14 @@ class Settings(BaseSettings):
     project_host: IPvAnyAddress
     project_port: int
 
-    smtp_servers_file: str
+    smtp_servers_file: FilePath
     sending_interval_sec: int
-    upload_folder: str
+    upload_folder: DirectoryPath
 
     redis_host: IPvAnyAddress | str
     redis_port: int
+    redis_num_db: int
+    redis_num_db_test: int
     redis_ttl_sec: int
 
     model_config = ConfigDict(env_file='.env')

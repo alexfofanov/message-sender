@@ -25,7 +25,7 @@ def anyio_backend():
     return 'asyncio'
 
 
-redis: Redis = from_url(settings.redis_url, db=1)
+redis: Redis = from_url(settings.redis_url, db=settings.redis_num_db_test)
 
 
 async def get_redis_test():

@@ -24,6 +24,8 @@ cd messages-sender
 
 Запуск сервиса: make start
 
+Запуск тестов: make tests
+
 Остановка сервиса: make stop
 ```
 

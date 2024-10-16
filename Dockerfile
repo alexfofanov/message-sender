@@ -11,6 +11,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-root
 
 COPY ./src ./src
+COPY ./tests ./tests
 COPY .env .
 COPY smtp_servers.json .
 

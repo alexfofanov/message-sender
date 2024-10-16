@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     smtp_servers_file: FilePath
     sending_interval_sec: int
-    upload_folder: DirectoryPath
+    upload_folder: Path
 
     redis_host: IPvAnyAddress | str
     redis_port: int

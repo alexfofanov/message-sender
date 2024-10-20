@@ -13,20 +13,33 @@
 Для демонстрации используется почтовый сервер [smtp4dev](https://github.com/rnwood/smtp4dev) 
 
 ## Установка и запуск
+Клонируем репозиторий:
 ```
 git clone https://github.com/alexfofanov/message-sender.git
-
+```
+Переходим в папку проекта:
+```
 cd messages-sender
-
-создать файл настройки проекта .env по обарзцу .env.sample
-
-создать файл настройки конфигурации smtp серверов smtp_servers.json по образцу smtp_servers.json.sample
-
+```
+Создать и при необходимости отредактировать файл настройки проекта .env
+```
+cp .env.sample .env
+```
+Создать и при необходимости отредактировать файл настройки конфигурации smtp серверов smtp_servers.json
+```
+cp smtp_servers.json.sample smtp_servers.json
+```
 Запуск сервиса: make start
-
+```
+make start
+```
 Запуск тестов: make tests
-
-Остановка сервиса: make stop
+```
+make tests
+```
+Остановка сервиса: 
+```
+make stop
 ```
 
 ## Примеры запросов
